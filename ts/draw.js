@@ -1,5 +1,7 @@
 import { ctx } from "./init";
-export function drawWithParameters(width, height) {
+export function drawWithParameters(width, height, sink_height, sink_width, sink_x, sink_y) {
+    //Clear the canvas
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     //Translate absolute measurement values to pixels
     var m = translateToPixels(width, height, 150);
     var pwidth = m.x;
@@ -17,6 +19,22 @@ export function drawWithParameters(width, height) {
     altcoords = Object.assign(altcoords, coords);
     altcoords.x -= 15;
     drawStraightMeasurementArrow(altcoords, pheight, height, true);
+    //Draw sink
+    ctx.beginPath();
+    var sinkcoords = findSinkCoords(coords, sink_x, sink_y);
+    sinkcoords = translateSinkCoordsToPixels(sinkcoords, pwidth);
+    var sinksize = translateSinkToPixels(pwidth, sink_width, sink_height);
+    var s_pwidth = sinksize.x;
+    var s_pheight = sinksize.y;
+    ctx.rect(sinkcoords.x, sinkcoords.y, s_pwidth, s_pheight);
+    ctx.stroke();
+    //Draw measurements of sink
+    altcoords = Object.assign(altcoords, sinkcoords);
+    altcoords.y += 15 + s_pheight;
+    drawStraightMeasurementArrow(altcoords, s_pwidth, sink_width, false, false, true);
+    altcoords = Object.assign(altcoords, sinkcoords);
+    altcoords.x -= 15;
+    drawStraightMeasurementArrow(altcoords, s_pheight, sink_height, true, false);
 }
 /**
  * Draw a measurement arrow with label. Location is the upper right hand based.
@@ -25,8 +43,10 @@ export function drawWithParameters(width, height) {
  * @param actualwidth Width to display in label
  * @param vertical Arrow vertical or not
  */
-function drawStraightMeasurementArrow(location, width, actualwidth, vertical) {
+function drawStraightMeasurementArrow(location, width, actualwidth, vertical, big, below) {
     if (vertical === void 0) { vertical = false; }
+    if (big === void 0) { big = true; }
+    if (below === void 0) { below = false; }
     //Quick mafs to get good coords
     var fromx, tox, fromy, toy;
     if (vertical) {
@@ -40,6 +60,13 @@ function drawStraightMeasurementArrow(location, width, actualwidth, vertical) {
         tox = location.x + width;
         fromy = location.y;
         toy = location.y;
+    }
+    //Set font size
+    if (big) {
+        ctx.font = "30px Arial";
+    }
+    else {
+        ctx.font = "15px Arial";
     }
     //Draw arrow
     var headlen = 10;
@@ -68,8 +95,20 @@ function drawStraightMeasurementArrow(location, width, actualwidth, vertical) {
         ctx.translate(location.x + dx * 0.5 - textwidth, location.y + dy * 0.5 - 5);
         ctx.rotate(angle);
     }
-    ctx.fillText(actualwidth + "mm", 0, 0);
+    if (below) {
+        ctx.fillText(actualwidth + "mm", 0, 20);
+    }
+    else {
+        ctx.fillText(actualwidth + "mm", 0, 0);
+    }
     ctx.restore();
+}
+function findSinkCoords(surfacecoords, x, y) {
+    var c = { x: 0, y: 0 };
+    c = Object.assign(c, surfacecoords);
+    c.x += x;
+    c.y += y;
+    return c;
 }
 /**
  * Find the coordinate to start drawing, so that the content ends up centered
@@ -80,6 +119,20 @@ function findStartingCoordinates(width, height) {
     var h = (ctx.canvas.height / 2) - (height / 2);
     var w = (ctx.canvas.width / 2) - (width / 2);
     return { x: w, y: h };
+}
+function translateSinkCoordsToPixels(sinkcoords, width) {
+    var ratio = sinkcoords.x / width;
+    sinkcoords.x *= ratio;
+    sinkcoords.y *= ratio;
+    return sinkcoords;
+}
+function translateSinkToPixels(width, swidth, sheight) {
+    //Scale sink to fit in surface
+    var c = { x: 0, y: 0 };
+    var ratio = swidth / width;
+    c.x = swidth * ratio;
+    c.y = sheight * ratio;
+    return c;
 }
 function translateToPixels(width, height, pad) {
     var ratio = height / width;

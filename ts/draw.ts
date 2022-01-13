@@ -7,7 +7,14 @@ interface Coordinate {
 
 export function drawWithParameters(
     width : number,
-    height: number) {
+    height: number,
+    sink_height : number,
+    sink_width : number,
+    sink_x : number,
+    sink_y : number) {
+        //Clear the canvas
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         //Translate absolute measurement values to pixels
         let m = translateToPixels(width, height, 150);
         let pwidth = m.x;
@@ -27,6 +34,24 @@ export function drawWithParameters(
         altcoords = Object.assign(altcoords, coords);
         altcoords.x -= 15
         drawStraightMeasurementArrow(altcoords, pheight, height, true);
+
+        //Draw sink
+        ctx.beginPath();
+        let sinkcoords = findSinkCoords(coords, sink_x, sink_y);
+        sinkcoords = translateSinkCoordsToPixels(sinkcoords, pwidth);
+        let sinksize = translateSinkToPixels(pwidth, sink_width, sink_height);
+        let s_pwidth = sinksize.x;
+        let s_pheight = sinksize.y;
+        ctx.rect(sinkcoords.x, sinkcoords.y, s_pwidth, s_pheight);
+        ctx.stroke();
+
+        //Draw measurements of sink
+        altcoords = Object.assign(altcoords, sinkcoords);
+        altcoords.y += 15 + s_pheight;
+        drawStraightMeasurementArrow(altcoords, s_pwidth, sink_width, false, false, true);
+        altcoords = Object.assign(altcoords, sinkcoords);
+        altcoords.x -= 15
+        drawStraightMeasurementArrow(altcoords, s_pheight, sink_height, true, false);
 }
 
 /**
@@ -36,7 +61,7 @@ export function drawWithParameters(
  * @param actualwidth Width to display in label
  * @param vertical Arrow vertical or not
  */
-function drawStraightMeasurementArrow(location : Coordinate, width : number, actualwidth: number, vertical = false) {
+function drawStraightMeasurementArrow(location : Coordinate, width : number, actualwidth: number, vertical = false, big = true, below = false) {
     //Quick mafs to get good coords
     let fromx : number, tox : number, fromy : number, toy : number;
     if (vertical) {
@@ -49,6 +74,13 @@ function drawStraightMeasurementArrow(location : Coordinate, width : number, act
         tox = location.x + width
         fromy = location.y
         toy = location.y;
+    }
+
+    //Set font size
+    if (big) {
+        ctx.font = "30px Arial";
+    } else {
+        ctx.font = "15px Arial";
     }
 
     //Draw arrow
@@ -78,8 +110,20 @@ function drawStraightMeasurementArrow(location : Coordinate, width : number, act
         ctx.translate(location.x + dx * 0.5 - textwidth, location.y + dy * 0.5 - 5);
         ctx.rotate(angle);
     }
-    ctx.fillText(actualwidth + "mm", 0, 0);
+    if (below) {
+        ctx.fillText(actualwidth + "mm", 0, 20);
+    } else {
+        ctx.fillText(actualwidth + "mm", 0, 0);
+    }
     ctx.restore();
+}
+
+function findSinkCoords(surfacecoords : Coordinate, x : number, y : number) : Coordinate {
+    let c : Coordinate = {x:0,y:0};
+    c = Object.assign(c, surfacecoords);
+    c.x += x;
+    c.y += y;
+    return c;
 }
 
 /**
@@ -92,6 +136,22 @@ function findStartingCoordinates(width: number, height: number) : Coordinate {
     let w = (ctx.canvas.width / 2) - (width / 2);
 
     return {x: w, y: h};
+}
+
+function translateSinkCoordsToPixels(sinkcoords : Coordinate, width : number) : Coordinate {
+    let ratio = sinkcoords.x / width;
+    sinkcoords.x *= ratio;
+    sinkcoords.y *= ratio;
+    return sinkcoords;
+}
+
+function translateSinkToPixels(width : number, swidth : number, sheight : number) : Coordinate {
+    //Scale sink to fit in surface
+    let c = {x: 0, y:0};
+    let ratio = swidth / width;
+    c.x = swidth * ratio;
+    c.y = sheight * ratio;
+    return c;
 }
 
 function translateToPixels(width : number, height : number, pad : number) : Coordinate {
