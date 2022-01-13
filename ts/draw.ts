@@ -1,4 +1,4 @@
-import { ctx } from "./init";
+import { ctx, TapHole, tapholes } from "./init";
 
 interface Coordinate {
     x : number, 
@@ -52,6 +52,14 @@ export function drawWithParameters(
         altcoords = Object.assign(altcoords, sinkcoords);
         altcoords.x -= 15
         drawStraightMeasurementArrow(altcoords, s_pheight, sink_height, true, false);
+
+        //Draw tap holes
+        for (var t of tapholes) {
+            let hole = transformTapHole(t, coords, pwidth);
+            ctx.beginPath();
+            ctx.arc(hole.x, hole.y, hole.diameter / 2, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
 }
 
 /**
@@ -124,6 +132,17 @@ function findSinkCoords(surfacecoords : Coordinate, x : number, y : number) : Co
     c.x += x;
     c.y += y;
     return c;
+}
+
+function transformTapHole(hole : TapHole, surfacecoords : Coordinate, width : number) {
+    hole.x += surfacecoords.x;
+    hole.y += surfacecoords.y;
+    let ratio = hole.x / width;
+    hole.x *= ratio;
+    hole.y *= ratio;
+    ratio = hole.diameter / width;
+    hole.diameter *= ratio;
+    return hole;
 }
 
 /**

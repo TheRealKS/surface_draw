@@ -1,4 +1,4 @@
-import { ctx } from "./init";
+import { ctx, tapholes } from "./init";
 export function drawWithParameters(width, height, sink_height, sink_width, sink_x, sink_y) {
     //Clear the canvas
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -35,6 +35,14 @@ export function drawWithParameters(width, height, sink_height, sink_width, sink_
     altcoords = Object.assign(altcoords, sinkcoords);
     altcoords.x -= 15;
     drawStraightMeasurementArrow(altcoords, s_pheight, sink_height, true, false);
+    //Draw tap holes
+    for (var _i = 0, tapholes_1 = tapholes; _i < tapholes_1.length; _i++) {
+        var t = tapholes_1[_i];
+        var hole = transformTapHole(t, coords, pwidth);
+        ctx.beginPath();
+        ctx.arc(hole.x, hole.y, hole.diameter / 2, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
 }
 /**
  * Draw a measurement arrow with label. Location is the upper right hand based.
@@ -109,6 +117,16 @@ function findSinkCoords(surfacecoords, x, y) {
     c.x += x;
     c.y += y;
     return c;
+}
+function transformTapHole(hole, surfacecoords, width) {
+    hole.x += surfacecoords.x;
+    hole.y += surfacecoords.y;
+    var ratio = hole.x / width;
+    hole.x *= ratio;
+    hole.y *= ratio;
+    ratio = hole.diameter / width;
+    hole.diameter *= ratio;
+    return hole;
 }
 /**
  * Find the coordinate to start drawing, so that the content ends up centered

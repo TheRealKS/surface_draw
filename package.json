@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@material/mwc-button": "^0.25.3",
+    "@material/mwc-dialog": "^0.25.3",
     "@material/mwc-icon-button": "^0.25.3",
     "@material/mwc-switch": "^0.25.3",
     "@material/mwc-textfield": "^0.25.3",
