@@ -1,8 +1,10 @@
-import { drawWithParameters } from "./draw";
+import { drawWithParameters, Perspective } from "./draw";
 
 export var ctx : CanvasRenderingContext2D;
 export var sink_enabled = true;
 export var tapholes : Array<TapHole> = [];
+
+var params : DrawingParameters;
 
 export interface TapHole {
     x : number,
@@ -30,8 +32,8 @@ window.onload = function() {
     ctx.font = "30px Arial";
 
     document.getElementById("draw_button").addEventListener("click", () => {
-        let params = collectParameters();
-        drawWithParameters(params.surfacewidth, params.surfaceheight, params.sinkheight, params.sinkwidth, params.sinkx, params.sinky);
+        params = collectParameters();
+        drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinkx, Perspective.TOP);
     });
 
     document.getElementById('switch_sink').addEventListener("click", function(e) {
@@ -68,6 +70,22 @@ window.onload = function() {
         tapholes.push(hole);
         document.getElementById("tap_hole_dialog").open = false;
     });
+
+    document.getElementById("p_top").addEventListener("click", function() {
+        if (params) {
+            drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinkx, Perspective.TOP);
+        }
+    });
+    document.getElementById("p_side").addEventListener("click", function() {
+        if (params) {
+            drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinkx, Perspective.SIDE);
+        }
+    });
+    document.getElementById("p_front").addEventListener("click", function() {
+        if (params) {
+            drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinkx, Perspective.FRONT);
+        }
+    });
 };
 
 function collectParameters() : DrawingParameters {
@@ -84,11 +102,13 @@ function collectParameters() : DrawingParameters {
     o.surfacewidth = parseInt(document.getElementById("field_width").value);
     o.surfaceheight = parseInt(document.getElementById("field_height").value);
     o.surfacethickness = parseInt(document.getElementById("field_thickness").value);
-    o.sinkheight = parseInt(document.getElementById("sink_width").value);
-    o.sinkwidth = parseInt(document.getElementById("sink_height").value);
-    o.sinkdepth = parseInt(document.getElementById("sink_depth").value);
-    o.sinkx = parseInt(document.getElementById("sink_x").value);
-    o.sinky = parseInt(document.getElementById("sink_y").value);
+    if (sink_enabled) {
+        o.sinkheight = parseInt(document.getElementById("sink_width").value);
+        o.sinkwidth = parseInt(document.getElementById("sink_height").value);
+        o.sinkdepth = parseInt(document.getElementById("sink_depth").value);
+        o.sinkx = parseInt(document.getElementById("sink_x").value);
+        o.sinky = parseInt(document.getElementById("sink_y").value);
+    }
     return o;
 }
 

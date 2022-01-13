@@ -1,11 +1,30 @@
-import { ctx, tapholes } from "./init";
-export function drawWithParameters(width, height, sink_height, sink_width, sink_x, sink_y) {
+import { ctx, sink_enabled, tapholes } from "./init";
+export var Perspective;
+(function (Perspective) {
+    Perspective[Perspective["TOP"] = 0] = "TOP";
+    Perspective[Perspective["SIDE"] = 1] = "SIDE";
+    Perspective[Perspective["FRONT"] = 2] = "FRONT";
+})(Perspective || (Perspective = {}));
+var hRatio, wRatio;
+export function drawWithParameters(width, height, thickness, sink_height, sink_width, sink_depth, sink_x, sink_y, perspective) {
     //Clear the canvas
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (perspective == Perspective.TOP) {
+        drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink_y);
+    }
+    else if (perspective == Perspective.SIDE) {
+        drawSidePerspective(height, thickness, sink_depth, sink_height, sink_y);
+    }
+    else {
+        drawFrontPerspective(width, thickness, sink_depth, sink_width, sink_x);
+    }
+}
+function drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink_y) {
     //Translate absolute measurement values to pixels
     var m = translateToPixels(width, height, 150);
     var pwidth = m.x;
     var pheight = m.y;
+    computeRatios(width, height, pwidth, pheight);
     //Draw outline of surface
     ctx.beginPath();
     var coords = findStartingCoordinates(pwidth, pheight);
@@ -19,30 +38,40 @@ export function drawWithParameters(width, height, sink_height, sink_width, sink_
     altcoords = Object.assign(altcoords, coords);
     altcoords.x -= 15;
     drawStraightMeasurementArrow(altcoords, pheight, height, true);
-    //Draw sink
-    ctx.beginPath();
-    var sinkcoords = findSinkCoords(coords, sink_x, sink_y);
-    sinkcoords = translateSinkCoordsToPixels(sinkcoords, pwidth);
-    var sinksize = translateSinkToPixels(pwidth, sink_width, sink_height);
-    var s_pwidth = sinksize.x;
-    var s_pheight = sinksize.y;
-    ctx.rect(sinkcoords.x, sinkcoords.y, s_pwidth, s_pheight);
-    ctx.stroke();
-    //Draw measurements of sink
-    altcoords = Object.assign(altcoords, sinkcoords);
-    altcoords.y += 15 + s_pheight;
-    drawStraightMeasurementArrow(altcoords, s_pwidth, sink_width, false, false, true);
-    altcoords = Object.assign(altcoords, sinkcoords);
-    altcoords.x -= 15;
-    drawStraightMeasurementArrow(altcoords, s_pheight, sink_height, true, false);
-    //Draw tap holes
-    for (var _i = 0, tapholes_1 = tapholes; _i < tapholes_1.length; _i++) {
-        var t = tapholes_1[_i];
-        var hole = transformTapHole(t, coords, pwidth);
+    //Since everything we're drawing from now on is relative to the surface, set the anchor point
+    ctx.save();
+    ctx.translate(coords.x, coords.y);
+    if (sink_enabled) {
+        //Draw sink
         ctx.beginPath();
-        ctx.arc(hole.x, hole.y, hole.diameter / 2, 0, 2 * Math.PI);
+        var sinkcoords = scaleCoord({ x: sink_x, y: sink_y });
+        var sinksize = scaleCoord({ x: sink_width, y: sink_height });
+        var s_pwidth = sinksize.x;
+        var s_pheight = sinksize.y;
+        ctx.rect(sinkcoords.x, sinkcoords.y, s_pwidth, s_pheight);
         ctx.stroke();
+        //Draw measurements of sink
+        altcoords = Object.assign(altcoords, sinkcoords);
+        altcoords.y += 15 + s_pheight;
+        drawStraightMeasurementArrow(altcoords, s_pwidth, sink_width, false, false, true);
+        altcoords = Object.assign(altcoords, sinkcoords);
+        altcoords.x -= 15;
+        drawStraightMeasurementArrow(altcoords, s_pheight, sink_height, true, false);
+        //Draw tap holes
+        for (var _i = 0, tapholes_1 = tapholes; _i < tapholes_1.length; _i++) {
+            var t = tapholes_1[_i];
+            var hole = scaleTapHole(t);
+            ctx.beginPath();
+            ctx.arc(hole.x, hole.y, hole.diameter / 2, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
     }
+    //Restore context for next draw
+    ctx.restore();
+}
+function drawSidePerspective(height, thickness, sink_depth, sink_height, sink_y) {
+}
+function drawFrontPerspective(width, thickness, sink_depth, sink_width, sink_y) {
 }
 /**
  * Draw a measurement arrow with label. Location is the upper right hand based.
@@ -111,22 +140,12 @@ function drawStraightMeasurementArrow(location, width, actualwidth, vertical, bi
     }
     ctx.restore();
 }
-function findSinkCoords(surfacecoords, x, y) {
-    var c = { x: 0, y: 0 };
-    c = Object.assign(c, surfacecoords);
-    c.x += x;
-    c.y += y;
-    return c;
-}
-function transformTapHole(hole, surfacecoords, width) {
-    hole.x += surfacecoords.x;
-    hole.y += surfacecoords.y;
-    var ratio = hole.x / width;
-    hole.x *= ratio;
-    hole.y *= ratio;
-    ratio = hole.diameter / width;
-    hole.diameter *= ratio;
-    return hole;
+function scaleTapHole(hole) {
+    var h = Object.assign({}, hole);
+    h.x *= wRatio;
+    h.y *= hRatio;
+    h.diameter *= wRatio;
+    return h;
 }
 /**
  * Find the coordinate to start drawing, so that the content ends up centered
@@ -138,19 +157,11 @@ function findStartingCoordinates(width, height) {
     var w = (ctx.canvas.width / 2) - (width / 2);
     return { x: w, y: h };
 }
-function translateSinkCoordsToPixels(sinkcoords, width) {
-    var ratio = sinkcoords.x / width;
-    sinkcoords.x *= ratio;
-    sinkcoords.y *= ratio;
-    return sinkcoords;
-}
-function translateSinkToPixels(width, swidth, sheight) {
-    //Scale sink to fit in surface
-    var c = { x: 0, y: 0 };
-    var ratio = swidth / width;
-    c.x = swidth * ratio;
-    c.y = sheight * ratio;
-    return c;
+function scaleCoord(c) {
+    var ac = Object.assign({ x: 0, y: 0 }, c);
+    ac.x *= wRatio;
+    ac.y *= hRatio;
+    return ac;
 }
 function translateToPixels(width, height, pad) {
     var ratio = height / width;
@@ -167,4 +178,18 @@ function translateToPixels(width, height, pad) {
         return translateToPixels(width, height, pad + 125);
     }
     return c;
+}
+function computeRatios(w, h, pw, ph) {
+    if (w > pw) {
+        wRatio = pw / w;
+    }
+    else {
+        wRatio = w / pw;
+    }
+    if (h > ph) {
+        hRatio = ph / h;
+    }
+    else {
+        hRatio = h / ph;
+    }
 }

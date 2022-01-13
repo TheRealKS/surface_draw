@@ -1,24 +1,51 @@
-import { ctx, TapHole, tapholes } from "./init";
+import { ctx, sink_enabled, TapHole, tapholes } from "./init";
+
+export enum Perspective {
+    TOP,
+    SIDE,
+    FRONT
+}
 
 interface Coordinate {
     x : number, 
     y : number
 }
 
+var hRatio, wRatio;
+
 export function drawWithParameters(
     width : number,
+    height: number,
+    thickness: number,
+    sink_height : number,
+    sink_width : number,
+    sink_depth : number,
+    sink_x : number,
+    sink_y : number,
+    perspective : Perspective) {
+        //Clear the canvas
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        if (perspective == Perspective.TOP) {
+            drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink_y);
+        } else if (perspective == Perspective.SIDE) {
+            drawSidePerspective(height, thickness, sink_depth, sink_height, sink_y);
+        } else {
+            drawFrontPerspective(width, thickness, sink_depth, sink_width, sink_x);
+        }
+}
+
+function drawTopPerspective(width : number,
     height: number,
     sink_height : number,
     sink_width : number,
     sink_x : number,
-    sink_y : number) {
-        //Clear the canvas
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
+    sink_y : number,) {
         //Translate absolute measurement values to pixels
         let m = translateToPixels(width, height, 150);
         let pwidth = m.x;
         let pheight = m.y;
+        computeRatios(width, height, pwidth, pheight);
 
         //Draw outline of surface
         ctx.beginPath();
@@ -35,11 +62,15 @@ export function drawWithParameters(
         altcoords.x -= 15
         drawStraightMeasurementArrow(altcoords, pheight, height, true);
 
+        //Since everything we're drawing from now on is relative to the surface, set the anchor point
+        ctx.save()
+        ctx.translate(coords.x, coords.y);
+
+        if (sink_enabled) {
         //Draw sink
-        ctx.beginPath();
-        let sinkcoords = findSinkCoords(coords, sink_x, sink_y);
-        sinkcoords = translateSinkCoordsToPixels(sinkcoords, pwidth);
-        let sinksize = translateSinkToPixels(pwidth, sink_width, sink_height);
+        ctx.beginPath();    
+        let sinkcoords = scaleCoord({x:sink_x, y:sink_y})
+        let sinksize = scaleCoord({x:sink_width, y:sink_height});
         let s_pwidth = sinksize.x;
         let s_pheight = sinksize.y;
         ctx.rect(sinkcoords.x, sinkcoords.y, s_pwidth, s_pheight);
@@ -55,11 +86,22 @@ export function drawWithParameters(
 
         //Draw tap holes
         for (var t of tapholes) {
-            let hole = transformTapHole(t, coords, pwidth);
+            let hole = scaleTapHole(t);
             ctx.beginPath();
             ctx.arc(hole.x, hole.y, hole.diameter / 2, 0, 2 * Math.PI);
             ctx.stroke();
         }
+        }
+        //Restore context for next draw
+        ctx.restore();  
+}
+
+function drawSidePerspective(height : number, thickness : number, sink_depth, sink_height, sink_y) {
+    
+}
+
+function drawFrontPerspective(width : number, thickness: number, sink_depth : number, sink_width : number, sink_y : number) {
+
 }
 
 /**
@@ -126,23 +168,12 @@ function drawStraightMeasurementArrow(location : Coordinate, width : number, act
     ctx.restore();
 }
 
-function findSinkCoords(surfacecoords : Coordinate, x : number, y : number) : Coordinate {
-    let c : Coordinate = {x:0,y:0};
-    c = Object.assign(c, surfacecoords);
-    c.x += x;
-    c.y += y;
-    return c;
-}
-
-function transformTapHole(hole : TapHole, surfacecoords : Coordinate, width : number) {
-    hole.x += surfacecoords.x;
-    hole.y += surfacecoords.y;
-    let ratio = hole.x / width;
-    hole.x *= ratio;
-    hole.y *= ratio;
-    ratio = hole.diameter / width;
-    hole.diameter *= ratio;
-    return hole;
+function scaleTapHole(hole : TapHole) {
+    let h = Object.assign({}, hole);
+    h.x *= wRatio;
+    h.y *= hRatio;
+    h.diameter *= wRatio;
+    return h;
 }
 
 /**
@@ -157,20 +188,11 @@ function findStartingCoordinates(width: number, height: number) : Coordinate {
     return {x: w, y: h};
 }
 
-function translateSinkCoordsToPixels(sinkcoords : Coordinate, width : number) : Coordinate {
-    let ratio = sinkcoords.x / width;
-    sinkcoords.x *= ratio;
-    sinkcoords.y *= ratio;
-    return sinkcoords;
-}
-
-function translateSinkToPixels(width : number, swidth : number, sheight : number) : Coordinate {
-    //Scale sink to fit in surface
-    let c = {x: 0, y:0};
-    let ratio = swidth / width;
-    c.x = swidth * ratio;
-    c.y = sheight * ratio;
-    return c;
+function scaleCoord(c : Coordinate) {
+    let ac = Object.assign({x:0, y:0}, c);
+    ac.x *= wRatio;
+    ac.y *= hRatio;
+    return ac;
 }
 
 function translateToPixels(width : number, height : number, pad : number) : Coordinate {
@@ -188,4 +210,17 @@ function translateToPixels(width : number, height : number, pad : number) : Coor
         return translateToPixels(width, height, pad + 125);
     }
     return c;
+}
+
+function computeRatios(w : number, h : number, pw : number, ph : number) {
+    if (w > pw) {
+        wRatio = pw / w;
+    } else {
+        wRatio = w / pw;
+    }
+    if (h > ph) {
+        hRatio = ph / h;
+    } else {
+        hRatio = h / ph;
+    }
 }

@@ -3,6 +3,9 @@
         <title>Werkblad tekening maken</title>
         <link rel="stylesheet" href="css/index.css"></link>
         <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200&display=swap" rel="stylesheet">
         <script type="module" src="ts/componentLoader.js"></script>
         <script type="module" src="ts/init.js"></script>
     </head>
@@ -31,16 +34,35 @@
 
                     <div class="vertical_divider"></div>
 
-                    <span class="settings_title">Materiaal</span>
-                    <mwc-textfield outlined label="Breedte" class="settings_field"></mwc-textfield>
-                    <mwc-textfield outlined label="Hoogte" class="settings_field"></mwc-textfield>
-                    <mwc-textfield outlined label="Dikte" class="settings_field"></mwc-textfield>
+                    <span class="settings_title">Instellingen</span>
+                    
+                    <mwc-formfield class="settings_field" label="Teken maten werkblad">
+                        <mwc-switch selected id="draw_m_surface"></mwc-switch>
+                    </mwc-formfield>
+                    <mwc-formfield class="settings_field" label="Teken maten wasbak">
+                        <mwc-switch selected id="draw_m_sink"></mwc-switch>
+                    </mwc-formfield>
+                    <mwc-formfield class="settings_field" label="Teken maten kraangaten">
+                        <mwc-switch id="draw_m_taphole"></mwc-switch>
+                    </mwc-formfield>
+                    <mwc-formfield class="settings_field" label="Gebruik andere kleur voor maatgeving">
+                        <mwc-switch id="diff_m_color"></mwc-switch>
+                    </mwc-formfield>
+                    <mwc-textfield outlined label="Titel Tekening" class="settings_field" id="pic_title"></mwc-textfield>
                 </div>
 
                 <canvas id="surface_drawing">
                 </canvas>
+                
+                <div class="perspective">
+                    <mwc-icon style="font-size: 2em; margin: 10px">control_camera</mwc-icon>
+                    <mwc-icon-button icon="vertical_align_bottom" class="perspective_bttn" id="p_top"></mwc-icon-button>
+                    <mwc-icon-button icon="vertical_align_bottom" class="perspective_bttn side" id="p_side"></mwc-icon-button>
+                    <mwc-icon-button icon="vertical_align_bottom" class="perspective_bttn front" id="p_front"></mwc-icon-button>
+                </div>
             </div>
         </mwc-top-app-bar-fixed>
+        
         <mwc-dialog id="tap_hole_dialog" heading="Kraangaten">
             <div class="tap_hole_list" id="tap_hole_list">
                 <mwc-button outlined label="3,3, 25mm" icon="delete"></mwc-button>
