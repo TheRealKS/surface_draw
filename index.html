@@ -1,0 +1,40 @@
+<html>
+    <head>
+        <title>Werkblad tekening maken</title>
+        <link rel="stylesheet" href="css/index.css"></link>
+        <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+        <script type="module" src="ts/componentLoader.js"></script>
+        <script type="module" src="ts/init.js"></script>
+    </head>
+    <body>
+        <mwc-top-app-bar-fixed centerTitle>
+            <mwc-icon-button icon="history" slot="navigationIcon"></mwc-icon-button>
+            <div slot="title">Werkblad tekenen</div>
+            <div>
+                <div class="settings_holder">
+                    <span class="settings_title">Maten</span>
+                    <mwc-textfield outlined label="Breedte" class="settings_field"></mwc-textfield>
+                    <mwc-textfield outlined label="Hoogte" class="settings_field"></mwc-textfield>
+                    <mwc-textfield outlined label="Dikte" class="settings_field"></mwc-textfield>
+
+                    <div class="vertical_divider"></div>
+
+                    <span class="settings_title">Wasbak <mwc-switch selected class="settings_switch"></mwc-switch></span>
+                    <mwc-textfield outlined label="Breedte" class="settings_field"></mwc-textfield>
+                    <mwc-textfield outlined label="Hoogte" class="settings_field"></mwc-textfield>
+                    <mwc-button outlined label="Kraan gaten" icon="bloodtype"></mwc-button>
+
+                    <div class="vertical_divider"></div>
+
+                    <span class="settings_title">Materiaal</span>
+                    <mwc-textfield outlined label="Breedte" class="settings_field"></mwc-textfield>
+                    <mwc-textfield outlined label="Hoogte" class="settings_field"></mwc-textfield>
+                    <mwc-textfield outlined label="Dikte" class="settings_field"></mwc-textfield>
+                </div>
+
+                <canvas id="surface_drawing">
+                </canvas>
+            </div>
+        </mwc-top-app-bar-fixed>
+    </body>
+</html>

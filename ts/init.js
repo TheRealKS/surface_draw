@@ -1,0 +1,11 @@
+import { drawWithParameters } from "./draw";
+export var ctx;
+window.onload = function () {
+    var canvas = document.getElementById("surface_drawing");
+    ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight / 2;
+    ctx.strokeStyle = 'black';
+    ctx.font = "30px Arial";
+    drawWithParameters(2000, 400);
+};

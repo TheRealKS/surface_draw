@@ -1,0 +1,21 @@
+{
+  "name": "werkblad",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@material/mwc-button": "^0.25.3",
+    "@material/mwc-icon-button": "^0.25.3",
+    "@material/mwc-switch": "^0.25.3",
+    "@material/mwc-textfield": "^0.25.3",
+    "@material/mwc-top-app-bar-fixed": "^0.25.3"
+  },
+  "devDependencies": {
+    "@web/dev-server": "^0.1.29"
+  }
+}
