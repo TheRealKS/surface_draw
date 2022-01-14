@@ -18,18 +18,18 @@
             <div>
                 <div class="settings_holder">
                     <span class="settings_title">Maten</span>
-                    <mwc-textfield outlined label="Breedte" class="settings_field" id="field_width"></mwc-textfield>
-                    <mwc-textfield outlined label="Hoogte" class="settings_field" id="field_height"></mwc-textfield>
-                    <mwc-textfield outlined label="Dikte" class="settings_field" id="field_thickness"></mwc-textfield>
+                    <mwc-textfield outlined label="Breedte" class="settings_field" id="field_width" value="1000"></mwc-textfield>
+                    <mwc-textfield outlined label="Hoogte" class="settings_field" id="field_height" value="400"></mwc-textfield>
+                    <mwc-textfield outlined label="Dikte" class="settings_field" id="field_thickness" value="30"></mwc-textfield>
 
                     <div class="vertical_divider"></div>
 
                     <span class="settings_title">Wasbak <mwc-switch selected class="settings_switch" id="switch_sink"></mwc-switch></span>
-                    <mwc-textfield outlined label="Breedte" class="settings_field" id="sink_width"></mwc-textfield>
-                    <mwc-textfield outlined label="Hoogte" class="settings_field" id="sink_height"></mwc-textfield>
-                    <mwc-textfield outlined label="Diepte" class="settings_field" id="sink_depth"></mwc-textfield>
-                    <mwc-textfield outlined label="Afstand vanaf linkerzijde" class="settings_field" id="sink_x"></mwc-textfield>
-                    <mwc-textfield outlined label="Afstad vanaf bovenzijde" class="settings_field" id="sink_y"></mwc-textfield>
+                    <mwc-textfield outlined label="Breedte" class="settings_field" id="sink_width" value="250"></mwc-textfield>
+                    <mwc-textfield outlined label="Hoogte" class="settings_field" id="sink_height" value="250"></mwc-textfield>
+                    <mwc-textfield outlined label="Diepte" class="settings_field" id="sink_depth" value="190"></mwc-textfield>
+                    <mwc-textfield outlined label="Afstand vanaf linkerzijde" class="settings_field" id="sink_x" value="100"></mwc-textfield>
+                    <mwc-textfield outlined label="Afstad vanaf bovenzijde" class="settings_field" id="sink_y" value="75"></mwc-textfield>
                     <mwc-button outlined label="Kraan gaten" icon="bloodtype" id="tap_hole_button"></mwc-button>
 
                     <div class="vertical_divider"></div>
@@ -55,7 +55,7 @@
                 </canvas>
                 
                 <div class="perspective">
-                    <mwc-icon style="font-size: 2em; margin: 10px">control_camera</mwc-icon>
+                    <mwc-icon style="font-size: 2em; margin: 10px; cursor: default;">control_camera</mwc-icon>
                     <mwc-icon-button icon="vertical_align_bottom" class="perspective_bttn" id="p_top"></mwc-icon-button>
                     <mwc-icon-button icon="vertical_align_bottom" class="perspective_bttn side" id="p_side"></mwc-icon-button>
                     <mwc-icon-button icon="vertical_align_bottom" class="perspective_bttn front" id="p_front"></mwc-icon-button>
