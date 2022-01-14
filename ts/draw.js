@@ -1,23 +1,41 @@
 import { ctx, sink_enabled, tapholes } from "./init";
 export var Perspective;
 (function (Perspective) {
-    Perspective[Perspective["TOP"] = 0] = "TOP";
-    Perspective[Perspective["SIDE"] = 1] = "SIDE";
-    Perspective[Perspective["FRONT"] = 2] = "FRONT";
+    Perspective["TOP"] = "Bovenaanzicht";
+    Perspective["SIDE"] = "Zijaanzicht";
+    Perspective["FRONT"] = "Vooraanzicht";
 })(Perspective || (Perspective = {}));
 var hRatio, wRatio;
-export function drawWithParameters(width, height, thickness, sink_height, sink_width, sink_depth, sink_x, sink_y, perspective) {
+var settings;
+export function drawWithParameters(width, height, thickness, sink_height, sink_width, sink_depth, sink_x, sink_y, drawsettings, perspective) {
+    settings = drawsettings;
     //Clear the canvas
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     if (perspective == Perspective.TOP) {
-        drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink_y);
+        var c = drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink_y);
+        drawTitle(perspective, c);
     }
     else if (perspective == Perspective.SIDE) {
-        drawSidePerspective(height, thickness, sink_depth, sink_height, sink_y);
+        var c = drawSidePerspective(height, thickness, sink_depth, sink_height, sink_y);
+        drawTitle(perspective, c);
     }
     else {
-        drawFrontPerspective(width, thickness, sink_depth, sink_width, sink_x);
+        var c = drawFrontPerspective(width, thickness, sink_depth, sink_width, sink_x);
+        drawTitle(perspective, c);
     }
+}
+function drawTitle(perspective, center) {
+    var str = perspective;
+    if (settings.title && settings.title != "") {
+        str = settings.title + " - " + perspective;
+    }
+    var textwidth = ctx.measureText(str).width;
+    var x = center - textwidth;
+    if (perspective == Perspective.TOP)
+        x += textwidth / 2;
+    var h = ctx.canvas.height - 20;
+    ctx.font = "30px Arial";
+    ctx.fillText(str, x, h);
 }
 function drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink_y) {
     //Translate absolute measurement values to pixels
@@ -32,12 +50,14 @@ function drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink
     ctx.stroke();
     //Draw measurements of outline
     var altcoords = { x: 0, y: 0 };
-    altcoords = Object.assign(altcoords, coords);
-    altcoords.y -= 15;
-    drawStraightMeasurementArrow(altcoords, pwidth, width);
-    altcoords = Object.assign(altcoords, coords);
-    altcoords.x -= 15;
-    drawStraightMeasurementArrow(altcoords, pheight, height, { vertical: true, bigtext: true });
+    if (settings.draw_surface_measurements) {
+        altcoords = Object.assign(altcoords, coords);
+        altcoords.y -= 15;
+        drawStraightMeasurementArrow(altcoords, pwidth, width);
+        altcoords = Object.assign(altcoords, coords);
+        altcoords.x -= 15;
+        drawStraightMeasurementArrow(altcoords, pheight, height, { vertical: true, bigtext: true });
+    }
     //Since everything we're drawing from now on is relative to the surface, set the anchor point
     ctx.save();
     ctx.translate(coords.x, coords.y);
@@ -51,38 +71,40 @@ function drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink
         ctx.rect(sinkcoords.x, sinkcoords.y, s_pwidth, s_pheight);
         ctx.stroke();
         //Draw measurements of sink
-        altcoords = Object.assign(altcoords, sinkcoords);
-        altcoords.y += 15 + s_pheight;
-        drawStraightMeasurementArrow(altcoords, s_pwidth, sink_width, { bigtext: false, textbelow: true });
-        altcoords = Object.assign(altcoords, sinkcoords);
-        altcoords.x -= 15;
-        drawStraightMeasurementArrow(altcoords, s_pheight, sink_height, { vertical: true, bigtext: false, textbelow: false });
-        //Draw measurements of sink relative to surface
-        altcoords = Object.assign(altcoords, sinkcoords);
-        //If there are tapholes, do not draw the arrow directly above surface
-        if (tapholes.length > 0) {
-            //Draw dotted line away from sink
-            ctx.beginPath();
-            ctx.setLineDash([5, 5]);
-            ctx.moveTo(altcoords.x + s_pwidth, altcoords.y);
-            ctx.lineTo(altcoords.x + s_pwidth + 50, altcoords.y);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            altcoords.x += (s_pwidth + 50);
-            altcoords.y = 0;
-            drawStraightMeasurementArrow(altcoords, sinkcoords.y, sink_y, { bigtext: false, vertical: true, forcetexthorizontal: true });
-            altcoords.x = sinkcoords.x + (s_pwidth / 2);
-        }
-        else {
+        if (settings.draw_sink_measurements) {
+            altcoords = Object.assign(altcoords, sinkcoords);
+            altcoords.y += 15 + s_pheight;
+            drawStraightMeasurementArrow(altcoords, s_pwidth, sink_width, { bigtext: false, textbelow: true });
+            altcoords = Object.assign(altcoords, sinkcoords);
+            altcoords.x -= 15;
+            drawStraightMeasurementArrow(altcoords, s_pheight, sink_height, { vertical: true, bigtext: false, textbelow: false });
+            //Draw measurements of sink relative to surface
+            altcoords = Object.assign(altcoords, sinkcoords);
+            //If there are tapholes, do not draw the arrow directly above surface
+            if (tapholes.length > 0) {
+                //Draw dotted line away from sink
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(altcoords.x + s_pwidth, altcoords.y);
+                ctx.lineTo(altcoords.x + s_pwidth + 50, altcoords.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                altcoords.x += (s_pwidth + 50);
+                altcoords.y = 0;
+                drawStraightMeasurementArrow(altcoords, sinkcoords.y, sink_y, { bigtext: false, vertical: true, forcetexthorizontal: true });
+                altcoords.x = sinkcoords.x + (s_pwidth / 2);
+            }
+            else {
+                altcoords.x += (s_pwidth / 2);
+                altcoords.y = 0;
+                drawStraightMeasurementArrow(altcoords, sinkcoords.y, sink_y, { bigtext: false, vertical: true, forcetexthorizontal: true });
+            }
             altcoords.x += (s_pwidth / 2);
-            altcoords.y = 0;
-            drawStraightMeasurementArrow(altcoords, sinkcoords.y, sink_y, { bigtext: false, vertical: true, forcetexthorizontal: true });
+            altcoords.y = sinkcoords.y + (s_pheight / 2);
+            var arrlength = pwidth - altcoords.x;
+            var actuallength = width - sink_x - sink_width;
+            drawStraightMeasurementArrow(altcoords, arrlength, actuallength, { bigtext: false });
         }
-        altcoords.x += (s_pwidth / 2);
-        altcoords.y = sinkcoords.y + (s_pheight / 2);
-        var arrlength = pwidth - altcoords.x;
-        var actuallength = width - sink_x - sink_width;
-        drawStraightMeasurementArrow(altcoords, arrlength, actuallength, { bigtext: false });
         //Draw tap holes
         for (var i = 0; i < tapholes.length; i++) {
             var t = tapholes[i];
@@ -91,7 +113,11 @@ function drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink
             ctx.arc(hole.x, hole.y, hole.diameter / 2, 0, 2 * Math.PI);
             ctx.stroke();
             //Draw measurement of tap hole
-            if (i == 0) {
+            if (i == 0 && settings.draw_tap_hole_measurements) {
+                if (settings.measurement_diff_color) {
+                    ctx.fillStyle = 'blue';
+                    ctx.strokeStyle = 'blue';
+                }
                 ctx.beginPath();
                 ctx.setLineDash([5, 5]);
                 ctx.moveTo(hole.x, hole.y);
@@ -101,11 +127,14 @@ function drawTopPerspective(width, height, sink_height, sink_width, sink_x, sink
                 ctx.font = "12px Arial";
                 var toffset = ctx.measureText("ø" + t.diameter + "mm").width;
                 ctx.fillText("ø" + t.diameter + "mm", hole.x - hole.diameter * 2 - toffset - 5, hole.y + 3);
+                ctx.fillStyle = 'black';
+                ctx.strokeStyle = 'black';
             }
         }
     }
     //Restore context for next draw
     ctx.restore();
+    return coords.x + (pwidth / 2);
 }
 function drawSidePerspective(height, thickness, sink_depth, sink_height, sink_y) {
     //Translate absolute values to pixels
@@ -124,13 +153,15 @@ function drawSidePerspective(height, thickness, sink_depth, sink_height, sink_y)
     ctx.stroke();
     //Draw measurements
     var altcoords = { x: 0, y: 0 };
-    altcoords = Object.assign(altcoords, coords);
-    altcoords.y -= 15;
-    drawStraightMeasurementArrow(altcoords, surface_pwidth, height);
-    altcoords = Object.assign(altcoords, coords);
-    altcoords.x -= 15;
-    //Thickness is usually a great magnitude smaller than other dimensions, so arrow will likely be small; use horizontal text
-    drawStraightMeasurementArrow(altcoords, surface_pheight, thickness, { vertical: true, bigtext: false, forcetexthorizontal: true });
+    if (settings.draw_surface_measurements) {
+        altcoords = Object.assign(altcoords, coords);
+        altcoords.y -= 15;
+        drawStraightMeasurementArrow(altcoords, surface_pwidth, height);
+        altcoords = Object.assign(altcoords, coords);
+        altcoords.x -= 15;
+        //Thickness is usually a great magnitude smaller than other dimensions, so arrow will likely be small; use horizontal text
+        drawStraightMeasurementArrow(altcoords, surface_pheight, thickness, { vertical: true, bigtext: false, forcetexthorizontal: true });
+    }
     //Since everything we're drawing from now on is relative to the surface, set the anchor point
     ctx.save();
     ctx.translate(coords.x, coords.y);
@@ -149,19 +180,25 @@ function drawSidePerspective(height, thickness, sink_depth, sink_height, sink_y)
         ctx.lineTo(sinkx + s_pwidth, sinky);
         ctx.stroke();
         //Draw sink depth measurement (relative to surface bottom)
-        var sinkcoords = { x: sinkx, y: sinky };
-        altcoords = Object.assign(altcoords, sinkcoords);
-        altcoords.y += 15 + s_pheight - sinky;
-        drawStraightMeasurementArrow(altcoords, s_pwidth, sink_height, { bigtext: false, textbelow: true });
-        altcoords = Object.assign(altcoords, sinkcoords);
-        altcoords.x -= 15;
-        drawStraightMeasurementArrow(altcoords, s_pheight - sinky, s_height, { vertical: true, bigtext: false, textbelow: false });
-        //Draw sink offset measurement
+        if (settings.draw_sink_measurements) {
+            var sinkcoords = { x: sinkx, y: sinky };
+            altcoords = Object.assign(altcoords, sinkcoords);
+            altcoords.y += 15 + s_pheight - sinky;
+            drawStraightMeasurementArrow(altcoords, s_pwidth, sink_height, { bigtext: false, textbelow: true });
+            altcoords = Object.assign(altcoords, sinkcoords);
+            altcoords.x -= 15;
+            drawStraightMeasurementArrow(altcoords, s_pheight - sinky, s_height, { vertical: true, bigtext: false, textbelow: false });
+            //Draw sink offset measurement
+            altcoords.x = sinkx + s_pwidth;
+            altcoords.y = sinky + 25;
+            drawStraightMeasurementArrow(altcoords, surface_pwidth - sinkx - s_pwidth, height - sink_y - sink_height, { bigtext: false });
+        }
     }
     ctx.restore();
+    return coords.x + (pwidth / 2);
 }
-function drawFrontPerspective(width, thickness, sink_depth, sink_width, sink_y) {
-    drawSidePerspective(width, thickness, sink_depth, sink_width, sink_y);
+function drawFrontPerspective(width, thickness, sink_depth, sink_width, sink_x) {
+    return drawSidePerspective(width, thickness, sink_depth, sink_width, sink_x);
 }
 /**
  * Draw a measurement arrow with label. Location is the upper right hand based.
@@ -200,6 +237,11 @@ function drawStraightMeasurementArrow(location, width, actualwidth, options) {
     else {
         ctx.font = "15px Arial";
         textheight = 15;
+    }
+    //If necessary, change color
+    if (settings.measurement_diff_color) {
+        ctx.fillStyle = 'blue';
+        ctx.strokeStyle = 'blue';
     }
     //Draw arrow
     var headlen = 10;
@@ -241,7 +283,10 @@ function drawStraightMeasurementArrow(location, width, actualwidth, options) {
     else {
         ctx.fillText(actualwidth + "mm", 0, 0);
     }
+    //Reset everything
     ctx.restore();
+    ctx.fillStyle = 'black';
+    ctx.strokeStyle = 'black';
 }
 function scaleTapHole(hole) {
     var h = Object.assign({}, hole);

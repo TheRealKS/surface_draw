@@ -34,7 +34,7 @@ window.onload = function() {
 
     document.getElementById("draw_button").addEventListener("click", () => {
         params = collectParameters();
-        drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, Perspective.TOP);
+        drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, params.settings, Perspective.TOP);
     });
 
     document.getElementById('switch_sink').addEventListener("click", function(e) {
@@ -74,17 +74,17 @@ window.onload = function() {
 
     document.getElementById("p_top").addEventListener("click", function() {
         if (params) {
-            drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, Perspective.TOP);
+            drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, params.settings, Perspective.TOP);
         }
     });
     document.getElementById("p_side").addEventListener("click", function() {
         if (params) {
-            drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, Perspective.SIDE);
+            drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, params.settings, Perspective.SIDE);
         }
     });
     document.getElementById("p_front").addEventListener("click", function() {
         if (params) {
-            drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, Perspective.FRONT);
+            drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, params.settings, Perspective.FRONT);
         }
     });
 };
@@ -121,6 +121,11 @@ function collectParameters() : DrawingParameters {
     s.draw_sink_measurements = document.getElementById("draw_m_sink").selected;
     s.draw_tap_hole_measurements = document.getElementById("draw_m_taphole").selected;
     s.measurement_diff_color = document.getElementById("diff_m_color").selected;
+    let t = document.getElementById("pic_title").value;
+    if (t != "") {
+        s.title = t;
+        document.getElementById("page_title").innerHTML = "Werkblad - " + t;
+    }
     o.settings = s;
 
     return o;
