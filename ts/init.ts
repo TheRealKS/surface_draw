@@ -87,7 +87,33 @@ window.onload = function() {
             drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, params.settings, Perspective.FRONT);
         }
     });
+
+    document.getElementById("download_button").addEventListener("click", function() {
+        let canvas : HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("surface_drawing");
+        fillAlpha(ctx, 'white');
+        var anchor = document.createElement("a");
+        anchor.href = canvas.toDataURL("image/png");
+        anchor.download = "werkblad.png";
+        anchor.click();
+    });
 };
+
+function fillAlpha(ctx, bgColor){  // bgColor is a valid CSS color ctx is 2d context
+    // save state
+    ctx.save();
+    // make sure defaults are set
+    ctx.globalAlpha = 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.filter = "none";
+ 
+    // fill transparent pixels with bgColor
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+ 
+    // cleanup
+    ctx.restore();
+ }
 
 function collectParameters() : DrawingParameters {
     let o : DrawingParameters = {
