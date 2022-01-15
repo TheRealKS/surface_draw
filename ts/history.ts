@@ -3,7 +3,7 @@ import { deleteAll, loadHistory } from "./io";
 
 window.onload = function() {
     document.getElementById("back").addEventListener("click", () => {
-        window.location.href = "/";
+        window.location.href = "/werkblad";
     });
     document.getElementById("delete_all").addEventListener("click", () => {
         if (confirm("Alles verwijderen?") == true) {
@@ -20,7 +20,7 @@ function loadHistoryUI() {
         for (var i = 0; i < arr.length; i++) {
             let element = createHistoryListElement(arr[i]);
             element.addEventListener("click", function() {
-                window.location.href = "/?id=" + i;
+                window.location.href = "/werkblad?id=" + i;
             });
             list.appendChild(element);
         }

@@ -109,6 +109,10 @@ window.onload = function() {
         }
     });
 
+    document.getElementById("history").addEventListener("click", function () {
+        window.location.href = "history.html";
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has("id")) {
         loadLayout(urlParams.get("id"));
