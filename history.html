@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <title>Geschiedenis</title>
+        <link rel="stylesheet" href="css/index.css"></link>
+        <link rel="stylesheet" href="css/history.css"></link>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200&display=swap" rel="stylesheet">
+        <script type="module" src="ts/componentLoader.js"></script>
+        <script type="module" src="ts/history.js"></script>
+    </head>
+    <body>
+        <mwc-top-app-bar-fixed centerTitle>
+            <mwc-icon-button icon="arrow_back" slot="navigationIcon" id="back"></mwc-icon-button>
+            <div slot="title" id="page_title">Geschiedenis</div>
+            <mwc-icon-button icon="delete" slot="actionItems" id="delete_all"></mwc-icon-button>
+            <div class="center_content">
+                <div class="history_list" id="history_list">
+                </div>
+            </div>
+        </mwc-top-app-bar-fixed>
+    </body>
+</html>

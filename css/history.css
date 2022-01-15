@@ -1,0 +1,26 @@
+.history_list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100vw;
+    padding: 2vh;
+    justify-content: center;
+}
+
+.history_entry {
+    padding: 2vh;
+    width: 21vw;
+    background-color: lightgray;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    margin-right: 2vh;
+    margin-bottom: 2vh;
+}
+
+.history_entry_title {
+    font-size: 2rem;
+}
+.history_entry_title_detail {
+    font-size: 1.5rem;
+}

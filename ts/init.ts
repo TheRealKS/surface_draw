@@ -1,8 +1,10 @@
 import { DrawingSettings, drawWithParameters, Perspective } from "./draw";
+import { loadLayout, saveLayout } from "./io";
 
 export var ctx : CanvasRenderingContext2D;
 export var sink_enabled = true;
 export var tapholes : Array<TapHole> = [];
+var saved = false;
 
 var params : DrawingParameters;
 
@@ -12,16 +14,18 @@ export interface TapHole {
     diameter : number
 }
 
-interface DrawingParameters {
+export interface DrawingParameters {
     surfacewidth : number,
     surfaceheight : number,
     surfacethickness : number,
+    sinkenabled : boolean,
     sinkwidth : number,
     sinkheight : number,
     sinkdepth : number,
     sinkx : number,
     sinky : number,
-    settings : DrawingSettings
+    settings : DrawingSettings,
+    tapholes : Array<TapHole>
 }
 
 window.onload = function() {
@@ -35,6 +39,8 @@ window.onload = function() {
     document.getElementById("draw_button").addEventListener("click", () => {
         params = collectParameters();
         drawWithParameters(params.surfacewidth, params.surfaceheight, params.surfacethickness, params.sinkheight, params.sinkwidth, params.sinkdepth, params.sinkx, params.sinky, params.settings, Perspective.TOP);
+        document.getElementById("save_button").setAttribute("icon", "save");
+        setSaved(false);
     });
 
     document.getElementById('switch_sink').addEventListener("click", function(e) {
@@ -96,6 +102,17 @@ window.onload = function() {
         anchor.download = "werkblad.png";
         anchor.click();
     });
+
+    document.getElementById("save_button").addEventListener("click", function() {
+        if (!saved && params) {
+            saveLayout(params);
+        }
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("id")) {
+        loadLayout(urlParams.get("id"));
+    }
 };
 
 function fillAlpha(ctx, bgColor){  // bgColor is a valid CSS color ctx is 2d context
@@ -120,16 +137,19 @@ function collectParameters() : DrawingParameters {
         surfacewidth: 0,
         surfaceheight: 0,
         surfacethickness: 0,
+        sinkenabled: true,
         sinkwidth: 0,
         sinkheight: 0,
         sinkdepth: 0,
         sinkx: 0,
         sinky: 0,
-        settings: undefined
+        settings: undefined,
+        tapholes: []
     };
     o.surfacewidth = parseInt(document.getElementById("field_width").value);
     o.surfaceheight = parseInt(document.getElementById("field_height").value);
     o.surfacethickness = parseInt(document.getElementById("field_thickness").value);
+    o.sinkenabled = sink_enabled;
     if (sink_enabled) {
         o.sinkheight = parseInt(document.getElementById("sink_width").value);
         o.sinkwidth = parseInt(document.getElementById("sink_height").value);
@@ -153,6 +173,7 @@ function collectParameters() : DrawingParameters {
         document.getElementById("page_title").innerHTML = "Werkblad - " + t;
     }
     o.settings = s;
+    o.tapholes = tapholes;
 
     return o;
 }
@@ -175,3 +196,42 @@ function populateTapHoleDialog() {
         list.appendChild(btn);
     }
 }
+
+export function setSaved(val : boolean) {
+    saved = val;
+}
+
+export function loadLayoutUI(l : DrawingParameters) {
+    document.getElementById("field_width").value = l.surfacewidth;
+    document.getElementById("field_height").value = l.surfaceheight;
+    document.getElementById("field_thickness").value = l.surfacethickness;
+    let s = document.getElementById('switch_sink');
+    if (s.selected != l.sinkenabled) {
+        s.click();
+    }
+    if (sink_enabled) {
+        document.getElementById("sink_width").value = l.sinkwidth;
+        document.getElementById("sink_height").value = l.sinkheight;
+        document.getElementById("sink_depth").value = l.sinkdepth;
+        document.getElementById("sink_x").value = l.sinkx;
+        document.getElementById("sink_y").value = l.sinky;
+    } else {
+        document.getElementById("sink_width").value = "";
+        document.getElementById("sink_height").value = "";
+        document.getElementById("sink_depth").value = "";
+        document.getElementById("sink_x").value = "";
+        document.getElementById("sink_y").value = "";
+    }
+    document.getElementById("draw_m_surface").selected = l.settings.draw_surface_measurements;
+    document.getElementById("draw_m_sink").selected = l.settings.draw_sink_measurements;
+    document.getElementById("draw_m_taphole").selected = l.settings.draw_tap_hole_measurements;
+    document.getElementById("diff_m_color").selected = l.settings.measurement_diff_color;
+    if (l.settings.title) {
+        document.getElementById("pic_title").value = l.settings.title;
+        document.getElementById("page_title").innerHTML = "Werkblad - " + l.settings.title;
+    }
+    tapholes = l.tapholes;
+    params = l;
+
+    document.getElementById("draw_button").click();
+} 

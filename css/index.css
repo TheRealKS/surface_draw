@@ -31,8 +31,8 @@ mwc-switch {
 
 .settings_title {
     font-size: 1.5rem;
-    margin-bottom: 2vh;
-    width: 19%;
+    margin-bottom: 1.5vh;
+    width: 21%;
 }
 
 .settings_switch {
@@ -40,7 +40,7 @@ mwc-switch {
 }
 
 .settings_field {
-    width: 19%;
+    width: 21%;
     margin-bottom: 2vh;
 }
 
