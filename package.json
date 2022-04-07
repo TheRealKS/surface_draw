@@ -13,6 +13,7 @@
     "@material/mwc-dialog": "^0.25.3",
     "@material/mwc-formfield": "^0.25.3",
     "@material/mwc-icon-button": "^0.25.3",
+    "@material/mwc-list": "^0.25.3",
     "@material/mwc-switch": "^0.25.3",
     "@material/mwc-textfield": "^0.25.3",
     "@material/mwc-top-app-bar-fixed": "^0.25.3"

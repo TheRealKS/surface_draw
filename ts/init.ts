@@ -3,8 +3,11 @@ import { loadLayout, saveLayout } from "./io";
 
 export var ctx : CanvasRenderingContext2D;
 export var sink_enabled = true;
+export var tapholes_enabled = true;
+export var sinks : Array<Sink>  = [];
 export var tapholes : Array<TapHole> = [];
 var saved = false;
+var dialogedit = false;
 
 var params : DrawingParameters;
 
@@ -12,6 +15,14 @@ export interface TapHole {
     x : number,
     y : number, 
     diameter : number
+}
+
+export interface Sink {
+    x : number,
+    y : number,
+    height : number,
+    width : number,
+    depth : number
 }
 
 export interface DrawingParameters {
@@ -46,26 +57,48 @@ window.onload = function() {
     document.getElementById('switch_sink').addEventListener("click", function(e) {
         if (e.target.selected) {
             sink_enabled = true;
-            document.getElementById("sink_width").disabled = false;
-            document.getElementById("sink_height").disabled = false;
-            document.getElementById("sink_depth").disabled = false;
-            document.getElementById("sink_x").disabled = false;
-            document.getElementById("sink_y").disabled = false;
-            document.getElementById("tap_hole_button").disabled = false;
+            document.getElementById("add_sink").disabled = false;
         } else {
             sink_enabled = false;
-            document.getElementById("sink_width").disabled = true;
-            document.getElementById("sink_height").disabled = true;
-            document.getElementById("sink_depth").disabled = true;
-            document.getElementById("sink_x").disabled = true;
-            document.getElementById("sink_y").disabled = true;
-            document.getElementById("tap_hole_button").disabled = true;
+            document.getElementById("add_sink").disabled = true;
         }
     });
 
-    document.getElementById("tap_hole_button").addEventListener("click", function() {
-        populateTapHoleDialog();
+    document.getElementById("switch_tapholes").addEventListener("click", function(e) {
+        if (e.target.selected) {
+            tapholes_enabled = true;
+            document.getElementById("add_taphole").disabled = false;
+        } else {
+            tapholes_enabled = false;
+            document.getElementById("add_taphole").disabled = true;
+        }
+    });
+
+    document.getElementById("add_sink").addEventListener("click", function() {
+        document.getElementById("sink_dialog").open = true;
+    });
+
+    document.getElementById("add_taphole").addEventListener("click", function() {
         document.getElementById("tap_hole_dialog").open = true;
+    });
+
+    document.getElementById("add_sink_btn").addEventListener("click", function() {
+        let sink : Sink = {
+            x: parseInt(document.getElementById("sink_x").value),
+            y: parseInt(document.getElementById("sink_y").value),
+            height: parseInt(document.getElementById("sink_height").value),
+            width: parseInt(document.getElementById("sink_width").value),
+            depth: parseInt(document.getElementById("sink_depth").value)
+        }
+        if (dialogedit) {
+            sinks[parseInt(document.getElementById("sink_dialog").getAttribute("edit"))] = sink;
+            document.getElementById("add_sink_btn").setAttribute("label", "Toevoegen");
+            dialogedit = false;
+        } else {
+            sinks.push(sink);
+        }
+        populateSinkList();
+        document.getElementById("sink_dialog").open = false;
     });
 
     document.getElementById("add_tap_hole").addEventListener("click", function() {
@@ -74,7 +107,14 @@ window.onload = function() {
             y: parseInt(document.getElementById("tap_hole_y").value),
             diameter: parseInt(document.getElementById("tap_hole_diameter").value)
         }; 
-        tapholes.push(hole);
+        if (dialogedit) {
+            tapholes[parseInt(document.getElementById("tap_hole_dialog").getAttribute("edit"))] = hole;
+            document.getElementById("add_tap_hole").setAttribute("label", "Toevoegen");
+            dialogedit = false;
+        } else {
+            tapholes.push(hole);
+        }
+        populateTapHoleList();
         document.getElementById("tap_hole_dialog").open = false;
     });
 
@@ -182,22 +222,84 @@ function collectParameters() : DrawingParameters {
     return o;
 }
 
-function populateTapHoleDialog() {
+function populateSinkDialog(sink : Sink) {
+    document.getElementById("sink_x").value = sink.x;
+    document.getElementById("sink_y").value = sink.y;
+    document.getElementById("sink_height").value = sink.height;
+    document.getElementById("sink_width").value = sink.width;
+    document.getElementById("sink_depth").value = sink.depth;
+}
+
+function populateSinkList() {
+    document.getElementById("sink_list").innerHTML = "";
+    for (var i = 0; i < sinks.length; i++) {
+        let holder = document.createElement("mwc-list-item");
+        holder.className = "list_item";
+        var sink = sinks[i];
+        let data = document.createElement("span");
+        data.className = "list_item_text";
+        data.innerHTML = sink.x + "," + sink.y + " - " + sink.width + "x" + sink.height + "x" + sink.depth;
+        let bttn = document.createElement("mwc-icon-button")
+        bttn.setAttribute("icon", "edit");
+        bttn.addEventListener("click", function() {
+            populateSinkDialog(sinks[this])
+            document.getElementById("add_sink_btn").setAttribute("label", "Bewerken");
+            document.getElementById("sink_dialog").setAttribute("edit", this.toString());
+            dialogedit = true;
+            document.getElementById("sink_dialog").open = true;
+        }.bind(i));
+        let bttn2 = document.createElement("mwc-icon-button");
+        bttn2.setAttribute("icon", "delete")
+        bttn2.addEventListener("click", function() {
+            sinks.splice(this);
+            populateSinkList();
+        }.bind(i));
+        holder.appendChild(data);
+        holder.appendChild(bttn);
+        holder.appendChild(bttn2);
+        document.getElementById("sink_list").appendChild(holder);
+    }
+}
+
+function populateTapHoleDialog(hole : TapHole) {
+    document.getElementById("tap_hole_x").value = hole.x;
+    document.getElementById("tap_hole_y").value = hole.y;
+    document.getElementById("tap_hole_diameter").value = hole.diameter;
+}
+
+function populateTapHoleList() {
     var list = document.getElementById("tap_hole_list");
     list.innerHTML = "";
     for (var i = 0; i < tapholes.length; i++) {
         let t = tapholes[i];
-        let btn = document.createElement("mwc-button");
-        btn.setAttribute("outlined", "true");
-        btn.setAttribute("icon", "delete");
-        btn.setAttribute("label", t.x + "," + t.y + "," + t.diameter + "mm");
-        btn.setAttribute("index", i.toString());
-        btn.addEventListener("click", function(event) {
-            let index = parseInt(event.target.getAttribute("index"));
-            tapholes.splice(index, 1);
-            populateTapHoleDialog();
-        })
-        list.appendChild(btn);
+        let item = document.createElement("mwc-list-item");
+        item.className = "list_item";
+        let label = document.createElement("span");
+        label.className = "list_item_text";
+        label.innerHTML = t.x + "," + t.y + "," + t.diameter + "mm";
+        let edit_btn = document.createElement("mwc-icon-button");
+        edit_btn.setAttribute("icon", "edit");
+        edit_btn.setAttribute("index", i.toString());
+        let delete_btn = document.createElement("mwc-icon-button");
+        delete_btn.setAttribute("icon", "delete");
+        delete_btn.setAttribute("index", i.toString());
+        item.appendChild(label);
+        item.appendChild(edit_btn);
+        item.appendChild(delete_btn);
+
+        edit_btn.addEventListener("click", function(event) {
+            populateTapHoleDialog(tapholes[this]);  
+            document.getElementById("add_tap_hole").setAttribute("label", "Bewerken");
+            document.getElementById("tap_hole_dialog").setAttribute("edit", this.toString());
+            dialogedit = true;
+            document.getElementById("tap_hole_dialog").open = true;
+        }.bind(i));
+
+        delete_btn.addEventListener("click", function(event) {
+            tapholes.splice(this, 1);
+            populateTapHoleList();
+        }.bind(i));
+        list.appendChild(item);
     }
 }
 

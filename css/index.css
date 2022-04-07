@@ -35,7 +35,7 @@ mwc-switch {
     width: 21%;
 }
 
-.settings_switch {
+.settings_switch {  
     margin-left: 2vh;
 }
 
@@ -79,4 +79,38 @@ mwc-switch {
     transform: rotate(180deg);
     border-left: none;
     border-right: 1px solid black;
+}
+
+.item_list {
+    height:70%;
+    width: 21%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.il_left {
+    margin-right: 1vh;
+}
+
+.il_right {
+    margin-right: 1vh;
+}
+
+.list_item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    border: 1px solid black;
+    border-radius: 4px;
+    padding: 1vh;
+    width: 90%;
+    margin-bottom: 1vh;
+}
+
+.list_item_text {
+    vertical-align: center;
+    display: inline-block;
+    color: #0277bd;
+    font-size: 1.2rem;
 }

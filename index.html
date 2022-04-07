@@ -8,7 +8,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200&display=swap" rel="stylesheet">
         <script type="module" src="ts/componentLoader.js"></script>
         <script type="module" src="ts/init.js"></script>
-    </head>
+    </head> 
     <body>
         <mwc-top-app-bar-fixed centerTitle>
             <mwc-icon-button icon="history" slot="navigationIcon" id="history"></mwc-icon-button>
@@ -26,12 +26,16 @@
                     <div class="vertical_divider"></div>
 
                     <span class="settings_title">Wasbak <mwc-switch selected class="settings_switch" id="switch_sink"></mwc-switch></span>
-                    <mwc-textfield outlined label="Breedte" class="settings_field" id="sink_width" value="250"></mwc-textfield>
-                    <mwc-textfield outlined label="Hoogte" class="settings_field" id="sink_height" value="250"></mwc-textfield>
-                    <mwc-textfield outlined label="Diepte" class="settings_field" id="sink_depth" value="190"></mwc-textfield>
-                    <mwc-textfield outlined label="Afstand vanaf linkerzijde" class="settings_field" id="sink_x" value="100"></mwc-textfield>
-                    <mwc-textfield outlined label="Afstad vanaf bovenzijde" class="settings_field" id="sink_y" value="75"></mwc-textfield>
-                    <mwc-button outlined label="Kraan gaten" icon="bloodtype" id="tap_hole_button"></mwc-button>
+                    <div class="item_list il_left" id="sink_list">
+                    </div>
+                    <mwc-button outlined label="Toevoegen" icon="add" id="add_sink"></mwc-button>
+
+                    <div class="vertical_divider"></div>
+
+                    <span class="settings_title">Kraangaten <mwc-switch selected class="settings_switch" id="switch_tapholes"></mwc-switch></span>
+                    <div class="item_list il_left" id="tap_hole_list">
+                    </div>
+                    <mwc-button outlined label="Toevoegen" icon="add" id="add_taphole"></mwc-button>
 
                     <div class="vertical_divider"></div>
 
@@ -64,15 +68,23 @@
             </div>
         </mwc-top-app-bar-fixed>
         
-        <mwc-dialog id="tap_hole_dialog" heading="Kraangaten">
-            <div class="tap_hole_list" id="tap_hole_list">
-                <mwc-button outlined label="3,3, 25mm" icon="delete"></mwc-button>
-            </div>
+        <mwc-dialog id="tap_hole_dialog" heading="Kraangat toevoegen">
             <div class="tap_hole_list add_tap_hole">
                 <mwc-textfield outlined label="Afstand vanaf linkerzijde" id="tap_hole_x" class="add_tap_hole_field"></mwc-textfield>
                 <mwc-textfield outlined label="Afstand vanaf bovenzijde" id="tap_hole_y" class="add_tap_hole_field"></mwc-textfield>
                 <mwc-textfield outlined label="Diameter" id="tap_hole_diameter" class="add_tap_hole_field"></mwc-textfield>
                 <mwc-button outlined label="Toevoegen" icon="done" id="add_tap_hole"></mwc-button>
+            </div>
+        </mwc-dialog>
+
+        <mwc-dialog id="sink_dialog" heading="Wasbak toevoegen">
+            <div class="tap_hole_list add_tap_hole">
+                <mwc-textfield outlined label="Afstand vanaf linkerzijde" id="sink_x" class="add_tap_hole_field"></mwc-textfield>
+                <mwc-textfield outlined label="Afstand vanaf bovenzijde" id="sink_y" class="add_tap_hole_field"></mwc-textfield>
+                <mwc-textfield outlined label="Hoogte" id="sink_height" class="add_tap_hole_field"></mwc-textfield>
+                <mwc-textfield outlined label="Breedte" id="sink_width" class="add_tap_hole_field"></mwc-textfield>
+                <mwc-textfield outlined label="Diepte" id="sink_depth" class="add_tap_hole_field"></mwc-textfield>
+                <mwc-button outlined label="Toevoegen" icon="done" id="add_sink_btn"></mwc-button>
             </div>
         </mwc-dialog>
     </body>
